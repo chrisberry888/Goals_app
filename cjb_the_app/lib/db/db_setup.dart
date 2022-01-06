@@ -1,6 +1,6 @@
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'goal.dart';
+import '../goal.dart';
 
 
 class GoalsDatabase {

@@ -26,9 +26,6 @@ class Goal {
     required this.dueDate
   });
 
-
-
-
   Goal copy({
     int? id,
     String? goal,

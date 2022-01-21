@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as Path;
 import 'package:sqflite/sqflite.dart';
-import '../db/db_setup.dart';
+import '../db/goals_database.dart';
 import 'home_page.dart';
 
 
@@ -43,19 +43,19 @@ class AddGoal extends StatelessWidget {
             TextField(
               controller: dateController,
               decoration: InputDecoration(
-                  hintText: 'Date (number)'
+                  hintText: 'Due Date (number)'
               ),
             ),
             TextField(
               controller: monthController,
               decoration: InputDecoration(
-                  hintText: 'Month (number 0-12)'
+                  hintText: 'Due Month (number 0-12)'
               ),
             ),
             TextField(
               controller: yearController,
               decoration: InputDecoration(
-                  hintText: 'Year (number)'
+                  hintText: 'Due Year (number)'
               ),
             ),
           ],
@@ -70,6 +70,12 @@ class AddGoal extends StatelessWidget {
       ),
     );
 
+  }
+
+
+  DateTime date_maker(String day, String month, String year) {
+
+    return DateTime.parse("$year-$month-$day");
   }
 
 }

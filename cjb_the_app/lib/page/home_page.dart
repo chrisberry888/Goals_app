@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as Path;
 import 'package:sqflite/sqflite.dart';
-import '../db/db_setup.dart';
+import '../db/goals_database.dart';
 import 'add_goal_page.dart';
+import '../goal.dart';
 
 
 class MyHomePage extends StatefulWidget {
@@ -18,14 +19,47 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+
+class _MyHomePageState extends State<MyHomePage> {
+
+  // int _counter = 0;
+  //
+  // void _incrementCounter() {
+  //   setState(() {
+  //     _counter++;
+  //   });
+  // }
+
+
+  late List<Goal> goals;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    refreshGoals();
   }
+
+
+  @override
+  void dispose() {
+    GoalsDatabase.instance.close();
+
+    super.dispose();
+  }
+
+  Future refreshGoals() async {
+    setState(() => isLoading = true);
+
+    this.goals = await GoalsDatabase.instance.readAllGoals();
+
+    setState(() => isLoading = false);
+  }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -33,35 +67,22 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
 
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title, style: TextStyle(fontSize: 24)),
       ),
 
       body: Center(
 
-        child: Column(
+        child: isLoading
+            ? CircularProgressIndicator()
+            : goals.isEmpty
+              ? Text('No Goals')
+              : buildGoals(),
+      ),
 
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'balls:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            Text(
-              'goal 1:',
-            ),
-            ElevatedButton(
-              onPressed: _incrementCounter,
-              child: Text('goal 2'),
-            ),
-            ElevatedButton(
-              onPressed: _pushAddGoal,
-              child: Text('Add Goal'),
-            ),
-          ],
-        ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pushAddGoal,
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
       ),
 
       drawer: Drawer(
@@ -81,9 +102,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: const Text('Item 1'),
               onTap: () {
-                // Update the state of the app
-                // ...
-                // Then close the drawer
+
+
                 Navigator.pop(context);
               },
             ),
@@ -99,21 +119,27 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pushAddGoal,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
-  void _test() {
 
-  }
+  Widget buildGoals() => ListView(
+    padding: EdgeInsets.all(8),
+    children: goals.map((goal) => Container(
+        height: 50,
+        color: Colors.red,
+        child: const Center(child: Text(goal.description)),
+      )).toList()
 
-  void _pushAddGoal() {
-    Navigator.of(context).push(
+
+  );
+
+  void _pushAddGoal() async {
+    await Navigator.of(context).push(
         MaterialPageRoute<void>(builder: (context) => AddGoal())
     );
+
+    refreshGoals();
   }
 }
